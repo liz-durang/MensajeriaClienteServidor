@@ -6,3 +6,22 @@ Grupo: 02
 
 ### Durán González Lizeth
 ### Moguel Krause Andrea
+
+## Getting Started
+
+**Servidor** 
+
+~~~
+javac ServidorCifrado01.java
+java ServidorCifrado
+~~~
+
+
+**Cliente** 
+
+~~~
+javac ClienteCifrado01.java
+java ClienteCifrado01 <dirección IP del dispositivo>
+
+Ej: java ClienteCifrado01 192.168.100.114
+~~~
