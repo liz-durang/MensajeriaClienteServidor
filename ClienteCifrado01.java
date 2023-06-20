@@ -48,7 +48,6 @@ public class ClienteCifrado01
       COMPROBACIÓN DE LLAVE
     */
     int keyHash = llave.hashCode();
-    System.out.println(keyHash);
     dos.writeInt(keyHash);
     if (dis.readInt() != KEY_CORRECT) {
       printError("Error en la llave. Compruebe que tenga la llave más reciente generada por el servidor.");
@@ -63,31 +62,24 @@ public class ClienteCifrado01
         System.out.print( "Envía un mensaje al servidor > " );
         BufferedReader br = new BufferedReader( new InputStreamReader( System.in ) );
         peticion = br.readLine();
-        if (peticion.equals("exit")) break;
         
         System.out.println( "===========================" );
         System.out.println("");
         System.out.println( "Se ha enviado el mensaje: " + peticion );
-        //System.out.println( "Cifraremos el mensaje..." );
-        byte[] arrayPeticion = peticion.getBytes();
-        Cipher cifrar = Cipher.getInstance("DES");
-        cifrar.init(Cipher.ENCRYPT_MODE, llave);
-        byte[] cipherText = cifrar.doFinal( arrayPeticion );
+
+        byte[] cipherText = cifrar(peticion.getBytes(), llave);
         System.out.print( "El argumento CIFRADO es: " );
-        // NO SE DEBE PASAR A String
-        // System.out.println( new String( cipherText ) );
+
         for(int i=0; i < cipherText.length; i++)
           System.out.print( (char)cipherText[i] );
         System.out.println( "" );
         // Como yo escribo la peticion a la red,
         // el Servidor debe leer de la red
-        System.out.println( " " );
-        System.out.println( "Lectura Byte a Byte: " );
-        bytesToBits( cipherText );
         dos.write( cipherText, 0, cipherText.length );
         System.out.println("");
         System.out.println( "===========================" );
 
+        if (peticion.equals("exit")) break;
 
         //Ahora Cliente lee lo que servidor mande
         int bytesLeidos = dis.read(respuesta);
@@ -98,10 +90,7 @@ public class ClienteCifrado01
           respuesta2[i] = respuesta[i];
         }
 
-        cifrar = Cipher.getInstance("DES");
-        cifrar.init(Cipher.DECRYPT_MODE, llave);
-        bytesToBits( respuesta2 );
-        byte[] newPlainText = cifrar.doFinal(respuesta2);
+        byte[] newPlainText = descifrar(respuesta2, llave);
         System.out.println( "El argumento DESENCRIPTADO es:" );
         // NO SE DEBE PASAR A String
         // System.out.println( new String(newPlainText, "UTF8") );

@@ -45,29 +45,27 @@ public class ServidorCifrado01
       try
       {
         socket = serverSocket.accept();
-        System.out.println("\nSe conecto un cliente: " + socket.getInetAddress().getHostName());
-        System.out.println("");
-        DataInputStream dis = null;
-        DataOutputStream dos = null;
+        // Como ya hay socket, obtengo los flujos asociados a este
+        DataInputStream dis = new DataInputStream( socket.getInputStream());
+        DataOutputStream dos = new DataOutputStream( socket.getOutputStream());
+
+        boolean clientConnect = true;
+
+        /*
+          COMPROBACIÓN DE LLAVE
+        */
+        int keyHash = llave.hashCode();
+        if (dis.readInt() == keyHash) {
+          dos.writeInt(KEY_CORRECT);
+          System.out.println("\nSe conecto un cliente: " + socket.getInetAddress().getHostName());
+          System.out.println("");
+        } else {
+          dos.writeInt(KEY_INCORRECT);
+          clientConnect = false;
+        }
+
         // Ciclo para hablar con el cliente 
-        while (true) {
-          // Como ya hay socket, obtengo los flujos asociados a este
-          dis = new DataInputStream( socket.getInputStream());
-          dos = new DataOutputStream( socket.getOutputStream());
-
-          /*
-            COMPROBACIÓN DE LLAVE
-          */
-          int keyHash = llave.hashCode();
-          System.out.println(keyHash);
-          if (dis.readInt() == keyHash) {
-            dos.writeInt(KEY_CORRECT);
-          } else {
-            dos.writeInt(KEY_INCORRECT);
-            break;
-          }
-
-
+        while (clientConnect) {
           // Despues de la conexion, Servidor y Cliente deben ponerse de acuerdo
           // para ver quien escribe primero y entonces el otro debe leer
           BufferedReader br = new BufferedReader( new InputStreamReader( System.in ) );
@@ -83,16 +81,14 @@ public class ServidorCifrado01
             peticion2[i] = peticion[i];
           }
 
-          Cipher cifrar = Cipher.getInstance("DES");
-          cifrar.init(Cipher.DECRYPT_MODE, llave);
-          System.out.println("");
-          bytesToBits( peticion2 );
-          byte[] newPlainText = cifrar.doFinal(peticion2);
-          System.out.print( "El mensaje DESENCRIPTADO es: " );
+          byte[] plainTextBytes = descifrar(peticion2, llave);
           // NO SE DEBE PASAR A String
           // System.out.println( new String(newPlainText, "UTF8") );
-          for(int i=0; i < newPlainText.length; i++)
-            System.out.print( (char)newPlainText[i] );
+          String plainText = "";
+          for(int i=0; i < plainTextBytes.length; i++)
+            plainText += (char)plainTextBytes[i];
+          System.out.println( "El mensaje DESENCRIPTADO es: " + plainText);
+          if (plainText.equals("exit")) break;
           
           System.out.println("");
           System.out.println( "\n===========================" );
@@ -100,10 +96,8 @@ public class ServidorCifrado01
           String respuesta = br.readLine();
           System.out.println( "Mi respuesta es: " + respuesta );
           System.out.println( "Ahora encriptamos la respuesta..." );
-          byte[] arrayRespuesta = respuesta.getBytes();
-          cifrar = Cipher.getInstance("DES");
-          cifrar.init(Cipher.ENCRYPT_MODE, llave);
-          byte[] cipherText = cifrar.doFinal( arrayRespuesta );
+
+          byte[] cipherText = cifrar(respuesta.getBytes(), llave);
           System.out.println( "El argumento ENCRIPTADO es:" );
           // NO SE DEBE PASAR A String
           // System.out.println( new String( cipherText ) );
