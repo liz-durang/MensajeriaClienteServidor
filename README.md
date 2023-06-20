@@ -1,4 +1,5 @@
-# Proyecto | Mensajería Cliente - Servidor para Sistemas Embebidos 
+# Proyecto 
+## Mensajería Cliente - Servidor para Sistemas Embebidos 
 Materia: Sistemas Embebidos
 Grupo: 02
 
